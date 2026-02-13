@@ -1,0 +1,232 @@
+:root {
+  /* Modern Light Theme Palette */
+  --bg-body: #f3f4f6;       /* Very light grey-blue */
+  --bg-panel: #ffffff;      /* Pure white cards */
+  --text-primary: #111827;  /* Almost black */
+  --text-secondary: #6b7280;/* Cool grey */
+  --accent: #2563eb;        /* Royal Blue */
+  --accent-hover: #1d4ed8;
+  --border: #e5e7eb;        /* Light grey border */
+  --success: #10b981;       /* Green for positive KPIs */
+  --danger: #ef4444;        /* Red for alerts */
+  
+  /* Fonts */
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", "SF Mono", Consolas, monospace;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background-color: var(--bg-body);
+  color: var(--text-primary);
+  line-height: 1.5;
+}
+
+/* Header */
+.header {
+  background: var(--bg-panel);
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.header h1 { margin: 0; font-size: 18px; font-weight: 600; color: var(--text-primary); }
+.header p { margin: 0; font-size: 13px; color: var(--text-secondary); }
+
+/* --- REVISED 2-COLUMN GRID LAYOUT --- */
+.grid {
+  display: grid;
+  grid-template-columns: 480px 1fr; /* Left fixed, Right expands */
+  grid-template-rows: auto 1fr; /* Rows adjust to content */
+  gap: 20px;
+  padding: 24px;
+  max-width: 1800px;
+  margin: 0 auto;
+  align-items: start;
+}
+
+/* Left Column: Logic Instruction (Top) */
+.panel:nth-child(1) {
+  grid-column: 1 / 2;
+  grid-row: 1 / 2;
+}
+
+/* Left Column: Documentation (Bottom) */
+.panel:nth-child(2) {
+  grid-column: 1 / 2;
+  grid-row: 2 / 3;
+}
+
+/* Right Column: Results (Spans Full Height) */
+.panel:nth-child(3) {
+  grid-column: 2 / 3;
+  grid-row: 1 / 3;
+  height: 100%;
+  min-height: 800px; /* Ensure it looks substantial */
+}
+
+/* Responsive: Collapse to 1 column on smaller screens */
+@media (max-width: 1100px) {
+  .grid {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+  }
+  .panel:nth-child(1), .panel:nth-child(2), .panel:nth-child(3) {
+    grid-column: auto;
+    grid-row: auto;
+    height: auto;
+    min-height: auto;
+  }
+}
+/* ------------------------------------ */
+
+/* Panels (Cards) */
+.panel {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+  display: flex;
+  flex-direction: column;
+}
+
+.panel h2 {
+  margin: 0 0 16px 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  border-left: 3px solid var(--accent);
+  padding-left: 8px;
+}
+
+.panel h3 {
+  margin: 20px 0 8px 0;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-secondary);
+}
+
+/* Inputs & Buttons */
+textarea {
+  width: 100%;
+  height: 400px; /* Height balance for left column */
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  background: #f9fafb;
+  color: #374151;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.2s;
+}
+textarea:focus { border-color: var(--accent); background: #fff; }
+
+.controls {
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+button {
+  background-color: var(--accent);
+  color: #fff;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+  box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+}
+button:hover { background-color: var(--accent-hover); }
+
+.status { font-size: 13px; color: var(--text-secondary); }
+
+/* Mermaid Diagram Container */
+.diagram {
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 16px;
+  height: 350px; /* Adjusted for stacking */
+  overflow: auto;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+/* KPI Cards */
+.kpis {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.kpi {
+  background: #f9fafb;
+  padding: 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  text-align: center;
+}
+.kpi-label { font-size: 11px; color: var(--text-secondary); font-weight: 500; margin-bottom: 4px; }
+.kpi-value { font-size: 18px; font-weight: 700; color: var(--text-primary); }
+
+/* Tables */
+.tableWrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+table { width: 100%; border-collapse: collapse; font-size: 12px; text-align: left; }
+th {
+  background: #f3f4f6;
+  color: var(--text-secondary);
+  font-weight: 600;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  color: #374151;
+}
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: #f9fafb; }
+
+/* Code/Pre Block */
+.codebox {
+  background: #2d2d2d; /* Keep dark for code contrast */
+  color: #e5e7eb;
+  padding: 12px;
+  border-radius: 6px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  overflow-x: auto;
+}
+
+/* Details/Summary */
+details {
+  margin-top: 16px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  background: #f9fafb;
+  padding: 10px;
+  border-radius: 6px;
+}
+summary { cursor: pointer; font-weight: 500; }
+ul { margin: 8px 0 0 20px; padding: 0; }
+li { margin-bottom: 4px; }

@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Driven Decision System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 100%);
+            color: #333;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .container {
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 900px;
+            padding: 30px;
+            margin: 20px 0;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #1e3a5f;
+            margin-bottom: 10px;
+            font-size: 2.2rem;
+        }
+        
+        .subtitle {
+            text-align: center;
+            margin-bottom: 25px;
+            color: #666;
+            font-size: 1.1rem;
+        }
+        
+        .api-section {
+            margin-bottom: 25px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #1e3a5f;
+        }
+        
+        .api-section h2 {
+            margin-bottom: 15px;
+            color: #1e3a5f;
+            font-size: 1.2rem;
+        }
+        
+        .api-input {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        input[type="text"] {
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="text"]:focus {
+            border-color: #1e3a5f;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(30, 58, 95, 0.2);
+        }
+        
+        button {
+            background: linear-gradient(to right, #1e3a5f, #2d5a87);
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 10px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .review-section {
+            margin-bottom: 25px;
+        }
+        
+        .review-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        .review-card h3 {
+            color: #1e3a5f;
+            margin-bottom: 10px;
+        }
+        
+        .review-text {
+            line-height: 1.6;
+            font-size: 16px;
+            color: #444;
+        }
+        
+        .sentiment-result {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            background-color: #f8f9fa;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        
+        .positive {
+            color: #28a745;
+            border: 2px solid #28a745;
+        }
+        
+        .negative {
+            color: #dc3545;
+            border: 2px solid #dc3545;
+        }
+        
+        .neutral {
+            color: #ffc107;
+            border: 2px solid #ffc107;
+        }
+        
+        .icon {
+            font-size: 24px;
+        }
+        
+        .action-result {
+            padding: 25px;
+            border-radius: 12px;
+            margin-top: 20px;
+            text-align: center;
+            display: none;
+        }
+        
+        .action-result.show {
+            display: block;
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .action-result h3 {
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+        
+        .action-result .action-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+        
+        .action-result .action-message {
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        
+        .action-result .action-button {
+            display: inline-block;
+            padding: 12px 30px;
+            border-radius: 25px;
+            color: white;
+            font-weight: bold;
+            text-decoration: none;
+            cursor: pointer;
+            border: none;
+            font-size: 16px;
+        }
+        
+        .action-coupon {
+            background-color: #fef2f2;
+            border: 2px solid #ef4444;
+        }
+        
+        .action-coupon h3 { color: #dc2626; }
+        .action-coupon .action-icon { color: #ef4444; }
+        .action-coupon .action-button { background-color: #ef4444; }
+        
+        .action-feedback {
+            background-color: #f3f4f6;
+            border: 2px solid #6b7280;
+        }
+        
+        .action-feedback h3 { color: #4b5563; }
+        .action-feedback .action-icon { color: #6b7280; }
+        .action-feedback .action-button { background-color: #6b7280; }
+        
+        .action-referral {
+            background-color: #eff6ff;
+            border: 2px solid #3b82f6;
+        }
+        
+        .action-referral h3 { color: #2563eb; }
+        .action-referral .action-icon { color: #3b82f6; }
+        .action-referral .action-button { background-color: #3b82f6; }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left: 4px solid #1e3a5f;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error {
+            color: #dc3545;
+            padding: 10px;
+            border-radius: 5px;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            margin: 10px 0;
+            display: none;
+        }
+        
+        .log-status {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 14px;
+            display: none;
+        }
+        
+        .log-status.success {
+            background-color: #d1fae5;
+            color: #065f46;
+            display: block;
+        }
+        
+        .log-status.error {
+            background-color: #fee2e2;
+            color: #991b1b;
+            display: block;
+        }
+        
+        .instructions {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        .instructions h3 {
+            margin-bottom: 10px;
+            color: #1e3a5f;
+        }
+        
+        .instructions ol {
+            padding-left: 20px;
+        }
+        
+        .instructions li {
+            margin-bottom: 8px;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                width: 95%;
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AI-Driven Decision System</h1>
+        <p class="subtitle">From Insight to Action - Automated Customer Response</p>
+        
+        <div class="api-section">
+            <h2><i class="fas fa-key"></i> API Configuration</h2>
+            <div class="api-input">
+                <label for="api-token">Hugging Face API Token (optional):</label>
+                <input type="text" id="api-token" placeholder="hf_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx">
+                <label for="sheets-url">Google Sheets Web App URL:</label>
+                <input type="text" id="sheets-url" placeholder="https://script.google.com/macros/s/xxx/exec">
+                <p><small>Your tokens are stored locally and never sent to our servers.</small></p>
+            </div>
+        </div>
+        
+        <div class="review-section">
+            <button id="analyze-btn">Analyze Random Review</button>
+            
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>Analyzing sentiment...</p>
+            </div>
+            
+            <div class="error" id="error-message"></div>
+            
+            <div class="review-card">
+                <h3>Selected Review:</h3>
+                <p class="review-text" id="review-text">Click the button above to analyze a random review</p>
+            </div>
+            
+            <div class="sentiment-result" id="sentiment-result">
+                <i class="fas fa-question-circle icon"></i>
+                <span>Sentiment will appear here</span>
+            </div>
+            
+            <div class="action-result" id="action-result">
+                <div class="action-icon"></div>
+                <h3 id="action-title"></h3>
+                <p class="action-message" id="action-message"></p>
+                <button class="action-button" id="action-button"></button>
+            </div>
+            
+            <div class="log-status" id="log-status"></div>
+        </div>
+        
+        <div class="instructions">
+            <h3>Setup Instructions:</h3>
+            <ol>
+                <li><strong>Hugging Face Token:</strong> Get from <a href="https://huggingface.co/settings/tokens" target="_blank">huggingface.co/settings/tokens</a></li>
+                <li><strong>Google Sheets Setup:</strong>
+                    <ul>
+                        <li>Create a Google Sheet with columns: timestamp, review, sentiment, confidence, action_taken</li>
+                        <li>Go to Extensions → Apps Script</li>
+                        <li>Paste the provided script and deploy as Web App</li>
+                    </ul>
+                </li>
+            </ol>
+        </div>
+    </div>
+    
+    <footer>
+        <p>Powered by Hugging Face AI - siebert/sentiment-roberta-large-english</p>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>

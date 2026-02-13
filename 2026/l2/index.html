@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Retention Policy Designer</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+
+<body>
+  <header class="header">
+    <div>
+      <h1>Retention Policy Designer</h1>
+      <p>Design your <b>Business Logic</b> in the Instruction box. Optimize for Policy Score.</p>
+    </div>
+    <div style="text-align: right;">
+        <p style="font-size: 12px; color: var(--text-secondary);">Target: Score > 85</p>
+    </div>
+  </header>
+
+  <main class="grid">
+    <!-- Left Column: Logic Editor -->
+    <section class="panel">
+      <h2>1. Logic Instruction (Editable)</h2>
+      <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 10px;">
+        Define your rules using <code>IF ... THEN ...</code> syntax. The system executes them in order.
+      </p>
+      <textarea id="instruction" spellcheck="false"></textarea>
+
+      <div class="row controls">
+        <button id="runBtn">▶ Run Simulation</button>
+        <span id="status" class="status">Ready</span>
+      </div>
+
+      <details>
+        <summary>🎯 Mission: Maximize Policy Score</summary>
+        <ul>
+          <li><b>Goal:</b> Reduce budget while keeping high-risk customers safe.</li>
+          <li><b>Strategy:</b> Edit the logic in <code>[RULES]</code> to target coupons better.</li>
+          <li><b>Scoring:</b> 
+            <br>+ Safety (High Risk Coverage)
+            <br>+ Efficiency (Budget Savings)
+            <br>- Penalty (Over Budget > $3,500)
+          </li>
+        </ul>
+      </details>
+    </section>
+
+    <!-- Center Column: Documentation Preview -->
+    <section class="panel">
+      <h2>2. Documentation (Mermaid)</h2>
+      <div id="diagram" class="diagram"></div>
+      <p class="muted" style="margin-top: 10px;">
+        Visualize your logic flow. Update the <code>[MERMAID]</code> block to match your rules.
+      </p>
+    </section>
+
+    <!-- Right Column: Simulation Results -->
+    <section class="panel">
+      <h2>3. Simulation Results</h2>
+      
+      <!-- New Score Card -->
+      <div class="kpis" style="grid-template-columns: 1fr 1fr;">
+        <div class="kpi" style="background: #eff6ff; border-color: #bfdbfe;">
+          <div class="kpi-label">🏆 Policy Score</div>
+          <div id="kpiScore" class="kpi-value" style="color: #2563eb; font-size: 24px;">—</div>
+        </div>
+        <div class="kpi">
+            <div class="kpi-label">High-Risk Coverage</div>
+            <div id="kpiCoverage" class="kpi-value">—</div>
+        </div>
+      </div>
+
+      <div class="kpis">
+        <div class="kpi"><div class="kpi-label">Simulated Rows</div><div id="kpiRows" class="kpi-value">—</div></div>
+        <div class="kpi"><div class="kpi-label">Total Budget</div><div id="kpiBudget" class="kpi-value">—</div></div>
+        <div class="kpi"><div class="kpi-label">Avg Cost/User</div><div id="kpiAvgCost" class="kpi-value">—</div></div>
+      </div>
+
+      <h3>Offer Distribution</h3>
+      <pre id="offerCounts" class="codebox">—</pre>
+
+      <h3>Sample Output (Top 15)</h3>
+      <div class="tableWrap">
+        <table id="outTable"></table>
+      </div>
+    </section>
+  </main>
+
+  <script type="module">
+    import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+    mermaid.initialize({ startOnLoad: false, theme: 'neutral' });
+    window.__mermaid__ = mermaid;
+  </script>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
