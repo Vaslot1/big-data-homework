@@ -152,6 +152,11 @@ function analyzeRandomReview() {
     logStatus.className = 'log-status';
     logStatus.textContent = '';
     
+    if (!apiToken) {
+        showError('Please enter your Hugging Face API token. The API requires authentication for CORS support.');
+        return;
+    }
+    
     if (reviews.length === 0) {
         showError('No reviews available. Please try again later.');
         return;
