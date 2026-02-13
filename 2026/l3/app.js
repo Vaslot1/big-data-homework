@@ -201,7 +201,7 @@ async function analyzeSentiment(text) {
         throw new Error('Please enter your Hugging Face API token first.');
     }
     
-    const result = await hf.sentimentAnalysis({
+    const result = await hf.textClassification({
         model: 'siebert/sentiment-roberta-large-english',
         inputs: text
     });
