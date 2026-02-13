@@ -1,9 +1,6 @@
-import { HfInference } from 'https://cdn.jsdelivr.net/npm/@huggingface/inference@2/+esm';
-
 let reviews = [];
 let apiToken = '';
 let sheetsUrl = '';
-let hf = null;
 
 const analyzeBtn = document.getElementById('analyze-btn');
 const reviewText = document.getElementById('review-text');
@@ -26,7 +23,6 @@ document.addEventListener('DOMContentLoaded', function() {
     if (savedToken) {
         apiTokenInput.value = savedToken;
         apiToken = savedToken;
-        hf = new HfInference(savedToken);
     }
     
     const savedSheetsUrl = localStorage.getItem('sheetsUrl');
@@ -68,10 +64,8 @@ function saveApiToken() {
     apiToken = apiTokenInput.value.trim();
     if (apiToken) {
         localStorage.setItem('hfApiToken', apiToken);
-        hf = new HfInference(apiToken);
     } else {
         localStorage.removeItem('hfApiToken');
-        hf = null;
     }
 }
 
@@ -158,7 +152,7 @@ function analyzeRandomReview() {
     logStatus.className = 'log-status';
     logStatus.textContent = '';
     
-    if (!hf) {
+    if (!apiToken) {
         showError('Please enter your Hugging Face API token. Get one free at huggingface.co/settings/tokens');
         return;
     }
@@ -197,16 +191,26 @@ function analyzeRandomReview() {
 }
 
 async function analyzeSentiment(text) {
-    if (!hf) {
+    if (!apiToken) {
         throw new Error('Please enter your Hugging Face API token first.');
     }
     
-    const result = await hf.textClassification({
-        model: 'siebert/sentiment-roberta-large-english',
-        inputs: text
+    const response = await fetch('https://corsproxy.io/?' + encodeURIComponent(
+        'https://api-inference.huggingface.co/models/siebert/sentiment-roberta-large-english'
+    ), {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiToken}`
+        },
+        body: JSON.stringify({ inputs: text })
     });
     
-    return result;
+    if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+    }
+    
+    return await response.json();
 }
 
 function displaySentiment(result) {
@@ -215,7 +219,7 @@ function displaySentiment(result) {
     let label = 'NEUTRAL';
     
     if (Array.isArray(result) && result.length > 0) {
-        const sentimentData = result[0];
+        const sentimentData = Array.isArray(result[0]) ? result[0][0] : result[0];
         label = sentimentData.label?.toUpperCase() || 'NEUTRAL';
         score = sentimentData.score ?? 0.5;
         
