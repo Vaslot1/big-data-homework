@@ -1,29 +1,25 @@
+import { pipeline } from "https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.7.6/dist/transformers.min.js";
+
 let reviews = [];
-let apiToken = '';
 let sheetsUrl = '';
+let sentimentPipeline = null;
 
 const analyzeBtn = document.getElementById('analyze-btn');
 const reviewText = document.getElementById('review-text');
 const sentimentResult = document.getElementById('sentiment-result');
 const loadingElement = document.querySelector('.loading');
 const errorElement = document.getElementById('error-message');
-const apiTokenInput = document.getElementById('api-token');
 const sheetsUrlInput = document.getElementById('sheets-url');
 const actionResult = document.getElementById('action-result');
 const logStatus = document.getElementById('log-status');
+const statusElement = document.getElementById('status');
 
 document.addEventListener('DOMContentLoaded', function() {
     loadReviews();
+    initSentimentModel();
     
     analyzeBtn.addEventListener('click', analyzeRandomReview);
-    apiTokenInput.addEventListener('change', saveApiToken);
     sheetsUrlInput.addEventListener('change', saveSheetsUrl);
-    
-    const savedToken = localStorage.getItem('hfApiToken');
-    if (savedToken) {
-        apiTokenInput.value = savedToken;
-        apiToken = savedToken;
-    }
     
     const savedSheetsUrl = localStorage.getItem('sheetsUrl');
     if (savedSheetsUrl) {
@@ -31,6 +27,29 @@ document.addEventListener('DOMContentLoaded', function() {
         sheetsUrl = savedSheetsUrl;
     }
 });
+
+async function initSentimentModel() {
+    try {
+        if (statusElement) {
+            statusElement.textContent = 'Loading sentiment model...';
+        }
+        
+        sentimentPipeline = await pipeline(
+            'text-classification',
+            'Xenova/distilbert-base-uncased-finetuned-sst-2-english'
+        );
+        
+        if (statusElement) {
+            statusElement.textContent = 'Sentiment model ready';
+        }
+    } catch (error) {
+        console.error('Failed to load sentiment model:', error);
+        showError('Failed to load sentiment model. Please check your network connection.');
+        if (statusElement) {
+            statusElement.textContent = 'Model load failed';
+        }
+    }
+}
 
 function loadReviews() {
     fetch('reviews_test.tsv')
@@ -58,15 +77,6 @@ function loadReviews() {
             console.error('TSV load error:', error);
             showError('Failed to load TSV file: ' + error.message);
         });
-}
-
-function saveApiToken() {
-    apiToken = apiTokenInput.value.trim();
-    if (apiToken) {
-        localStorage.setItem('hfApiToken', apiToken);
-    } else {
-        localStorage.removeItem('hfApiToken');
-    }
 }
 
 function saveSheetsUrl() {
@@ -152,8 +162,8 @@ function analyzeRandomReview() {
     logStatus.className = 'log-status';
     logStatus.textContent = '';
     
-    if (!apiToken) {
-        showError('Please enter your Hugging Face API token. Get one free at huggingface.co/settings/tokens');
+    if (!sentimentPipeline) {
+        showError('Sentiment model is still loading. Please wait a moment.');
         return;
     }
     
@@ -191,26 +201,17 @@ function analyzeRandomReview() {
 }
 
 async function analyzeSentiment(text) {
-    if (!apiToken) {
-        throw new Error('Please enter your Hugging Face API token first.');
+    if (!sentimentPipeline) {
+        throw new Error('Sentiment model is not initialized.');
     }
     
-    const response = await fetch('https://corsproxy.io/?' + encodeURIComponent(
-        'https://api-inference.huggingface.co/models/siebert/sentiment-roberta-large-english'
-    ), {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${apiToken}`
-        },
-        body: JSON.stringify({ inputs: text })
-    });
+    const output = await sentimentPipeline(text);
     
-    if (!response.ok) {
-        throw new Error(`API error: ${response.status}`);
+    if (!Array.isArray(output) || output.length === 0) {
+        throw new Error('Invalid sentiment output from model.');
     }
     
-    return await response.json();
+    return [output];
 }
 
 function displaySentiment(result) {
@@ -218,8 +219,8 @@ function displaySentiment(result) {
     let score = 0.5;
     let label = 'NEUTRAL';
     
-    if (Array.isArray(result) && result.length > 0) {
-        const sentimentData = Array.isArray(result[0]) ? result[0][0] : result[0];
+    if (Array.isArray(result) && result.length > 0 && Array.isArray(result[0]) && result[0].length > 0) {
+        const sentimentData = result[0][0];
         label = sentimentData.label?.toUpperCase() || 'NEUTRAL';
         score = sentimentData.score ?? 0.5;
         
@@ -260,7 +261,7 @@ async function logToGoogleSheets(review, sentiment, confidence, actionTaken) {
     };
     
     try {
-        const response = await fetch(sheetsUrl, {
+        await fetch(sheetsUrl, {
             method: 'POST',
             mode: 'no-cors',
             headers: {

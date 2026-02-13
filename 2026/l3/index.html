@@ -336,17 +336,16 @@
         <p class="subtitle">From Insight to Action - Automated Customer Response</p>
         
         <div class="api-section">
-            <h2><i class="fas fa-key"></i> API Configuration</h2>
+            <h2><i class="fas fa-cloud"></i> Configuration</h2>
             <div class="api-input">
-                <label for="api-token">Hugging Face API Token (optional):</label>
-                <input type="text" id="api-token" placeholder="hf_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx">
-                <label for="sheets-url">Google Sheets Web App URL:</label>
+                <label for="sheets-url">Google Sheets Web App URL (optional):</label>
                 <input type="text" id="sheets-url" placeholder="https://script.google.com/macros/s/xxx/exec">
-                <p><small>Your tokens are stored locally and never sent to our servers.</small></p>
+                <p><small>URL is stored locally and never sent to our servers.</small></p>
             </div>
         </div>
         
         <div class="review-section">
+            <p id="status" style="text-align: center; color: #666; margin-bottom: 10px;">Loading sentiment model...</p>
             <button id="analyze-btn">Analyze Random Review</button>
             
             <div class="loading">
@@ -379,7 +378,7 @@
         <div class="instructions">
             <h3>Setup Instructions:</h3>
             <ol>
-                <li><strong>Hugging Face Token:</strong> Get from <a href="https://huggingface.co/settings/tokens" target="_blank">huggingface.co/settings/tokens</a></li>
+                <li><strong>Sentiment Model:</strong> Runs locally in your browser using Transformers.js (no API token needed)</li>
                 <li><strong>Google Sheets Setup:</strong>
                     <ul>
                         <li>Create a Google Sheet with columns: timestamp, review, sentiment, confidence, action_taken</li>
