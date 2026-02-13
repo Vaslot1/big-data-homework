@@ -1,6 +1,9 @@
+import { HfInference } from 'https://cdn.jsdelivr.net/npm/@huggingface/inference@2/+esm';
+
 let reviews = [];
 let apiToken = '';
 let sheetsUrl = '';
+let hf = null;
 
 const analyzeBtn = document.getElementById('analyze-btn');
 const reviewText = document.getElementById('review-text');
@@ -23,6 +26,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (savedToken) {
         apiTokenInput.value = savedToken;
         apiToken = savedToken;
+        hf = new HfInference(savedToken);
     }
     
     const savedSheetsUrl = localStorage.getItem('sheetsUrl');
@@ -64,8 +68,10 @@ function saveApiToken() {
     apiToken = apiTokenInput.value.trim();
     if (apiToken) {
         localStorage.setItem('hfApiToken', apiToken);
+        hf = new HfInference(apiToken);
     } else {
         localStorage.removeItem('hfApiToken');
+        hf = null;
     }
 }
 
@@ -152,8 +158,8 @@ function analyzeRandomReview() {
     logStatus.className = 'log-status';
     logStatus.textContent = '';
     
-    if (!apiToken) {
-        showError('Please enter your Hugging Face API token. The API requires authentication for CORS support.');
+    if (!hf) {
+        showError('Please enter your Hugging Face API token. Get one free at huggingface.co/settings/tokens');
         return;
     }
     
@@ -191,28 +197,15 @@ function analyzeRandomReview() {
 }
 
 async function analyzeSentiment(text) {
-    const headers = {
-        'Content-Type': 'application/json'
-    };
-    
-    if (apiToken) {
-        headers['Authorization'] = `Bearer ${apiToken}`;
+    if (!hf) {
+        throw new Error('Please enter your Hugging Face API token first.');
     }
     
-    const response = await fetch(
-        'https://api-inference.huggingface.co/models/siebert/sentiment-roberta-large-english',
-        {
-            headers: headers,
-            method: 'POST',
-            body: JSON.stringify({ inputs: text }),
-        }
-    );
+    const result = await hf.sentimentAnalysis({
+        model: 'siebert/sentiment-roberta-large-english',
+        inputs: text
+    });
     
-    if (!response.ok) {
-        throw new Error(`API error: ${response.status} ${response.statusText}`);
-    }
-    
-    const result = await response.json();
     return result;
 }
 
@@ -221,8 +214,8 @@ function displaySentiment(result) {
     let score = 0.5;
     let label = 'NEUTRAL';
     
-    if (Array.isArray(result) && result.length > 0 && Array.isArray(result[0]) && result[0].length > 0) {
-        const sentimentData = result[0][0];
+    if (Array.isArray(result) && result.length > 0) {
+        const sentimentData = result[0];
         label = sentimentData.label?.toUpperCase() || 'NEUTRAL';
         score = sentimentData.score ?? 0.5;
         
